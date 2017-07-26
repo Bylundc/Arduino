@@ -38,14 +38,15 @@ const int pin_e = 10;
 const int pin_d = 9;
 const int pin_cc_2 = 8; //Right segment
 const int pin_c = 7;
+unsigned long BlinkDelay = 10;
 
 // Set up variables for shifting
 const int switch_shift_side1 = 12;
 const int switch_shift_side2 = 13;
-int Reading1;
-int prevReading1;
-int Reading2;
-int prevReading2;
+int Reading_switch_shift_1;
+int prevReading_switch_shift_1;
+int Reading_switch_shift_2;
+int prevReading_switch_shift_2;
 int Gear = 1;
 
 // Define the ON switch pin
@@ -61,7 +62,7 @@ unsigned long prevDebounceTime;
 unsigned long DebounceDelay = 300;
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   
   // Shift solenoids are OUTPUTs
   pinMode(Sol1,OUTPUT);
@@ -85,13 +86,37 @@ void setup() {
 }
 
 void loop() {
-  if(digitalRead(switch_ON) == LOW)
+  // Complete Auto situation
+  if(digitalRead(switch_ON) == LOW && digitalRead(switch_TC_side1) == HIGH)
   {    
     Serial.print("System is OFF");
+    Gear = 1;
     
     digitalWrite(Sol1,HIGH); //OFF
     digitalWrite(Sol2,HIGH); //OFF
 
+    digitalWrite(pin_cc_1,LOW); //ON
+    digitalWrite(pin_cc_2,LOW); //OFF
+    // A
+    digitalWrite(pin_g,HIGH);
+    digitalWrite(pin_f,HIGH);
+    digitalWrite(pin_a,HIGH);
+    digitalWrite(pin_b,HIGH);
+    digitalWrite(pin_e,HIGH);
+    digitalWrite(pin_d,LOW);
+    digitalWrite(pin_c,HIGH);
+  }
+  // Auto transmission, Manual OFF on TC
+  else if(digitalRead(switch_ON) == LOW && digitalRead(switch_TC_side1) == LOW && digitalRead(switch_TC_side2) == LOW)
+  {
+    Serial.print("System is OFF");
+    Gear = 1;
+    
+    digitalWrite(Sol1,HIGH); //OFF
+    digitalWrite(Sol2,HIGH); //OFF
+
+    for (int k = 0; k < 5; k++)
+    {
     digitalWrite(pin_cc_1,LOW); //ON
     digitalWrite(pin_cc_2,HIGH); //OFF
     // A
@@ -102,22 +127,75 @@ void loop() {
     digitalWrite(pin_e,HIGH);
     digitalWrite(pin_d,LOW);
     digitalWrite(pin_c,HIGH);
+    delay(BlinkDelay);
+    
+    digitalWrite(pin_cc_1,HIGH); //OFF
+    digitalWrite(pin_cc_2,LOW); //ON
+    // U
+    digitalWrite(pin_g,LOW);
+    digitalWrite(pin_f,HIGH);
+    digitalWrite(pin_a,LOW);
+    digitalWrite(pin_b,HIGH);
+    digitalWrite(pin_e,HIGH);
+    digitalWrite(pin_d,HIGH);
+    digitalWrite(pin_c,HIGH);
+    delay(BlinkDelay);
+
+    k++;
+    }
   }
-  
-  else{
+  // Auto transmission, Manual ON on TC
+  else if(digitalRead(switch_ON) == LOW && digitalRead(switch_TC_side1) == LOW && digitalRead(switch_TC_side2) == HIGH)
+  {
+    Serial.print("System is OFF");
+    Gear = 1;
+    
+    digitalWrite(Sol1,HIGH); //OFF
+    digitalWrite(Sol2,HIGH); //OFF
+
+    for (int k = 0; k < 5; k++)
+    {
+    digitalWrite(pin_cc_1,LOW); //ON
+    digitalWrite(pin_cc_2,HIGH); //OFF
+    // A
+    digitalWrite(pin_g,HIGH);
+    digitalWrite(pin_f,HIGH);
+    digitalWrite(pin_a,HIGH);
+    digitalWrite(pin_b,HIGH);
+    digitalWrite(pin_e,HIGH);
+    digitalWrite(pin_d,LOW);
+    digitalWrite(pin_c,HIGH);
+    delay(BlinkDelay);
+    
+    digitalWrite(pin_cc_1,HIGH); //OFF
+    digitalWrite(pin_cc_2,LOW); //ON
+    // L
+    digitalWrite(pin_g,LOW);
+    digitalWrite(pin_f,HIGH);
+    digitalWrite(pin_a,LOW);
+    digitalWrite(pin_b,LOW);
+    digitalWrite(pin_e,HIGH);
+    digitalWrite(pin_d,HIGH);
+    digitalWrite(pin_c,LOW);
+    delay(BlinkDelay);
+    }
+  }
+  // Manual Transmission, Auto TC lockup
+  else if (digitalRead(switch_ON) == HIGH && digitalRead(switch_TC_side1) == HIGH && digitalRead(switch_TC_side2) == LOW)
+    {
     Serial.print("System is ON");
     
     DebounceTime = millis();
     
-    Reading1 = digitalRead(switch_shift_side1);
-    Reading2 = digitalRead(switch_shift_side2);
+    Reading_switch_shift_1 = digitalRead(switch_shift_side1);
+    Reading_switch_shift_2 = digitalRead(switch_shift_side2);
     
-    if(Reading1 == HIGH && prevReading1 != Reading1 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    if(Reading_switch_shift_1 == HIGH && prevReading_switch_shift_1 != Reading_switch_shift_1 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
     {
       Gear++;
       prevDebounceTime = DebounceTime;
     }
-    else if(Reading2 == HIGH && prevReading2 != Reading2 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    else if(Reading_switch_shift_2 == HIGH && prevReading_switch_shift_2 != Reading_switch_shift_2 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
     {
       Gear--;
       prevDebounceTime = DebounceTime;
@@ -132,14 +210,16 @@ void loop() {
       Gear = 4;
     }
   
-    prevReading1 = Reading1;
-    prevReading2 = Reading2;
+    prevReading_switch_shift_1 = Reading_switch_shift_1;
+    prevReading_switch_shift_2 = Reading_switch_shift_2;
     
     if (Gear == 1)
     { 
       digitalWrite(Sol1,LOW); //ON
       digitalWrite(Sol2,HIGH); //OFF
-  
+
+      for (int k = 0; k < 5; k++)
+      {
       digitalWrite(pin_cc_1,LOW); //ON
       digitalWrite(pin_cc_2,HIGH); //OFF
       // 1
@@ -150,12 +230,28 @@ void loop() {
       digitalWrite(pin_e,LOW);
       digitalWrite(pin_d,LOW);
       digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // A
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
     }
     else if (Gear == 2)
     {
       digitalWrite(Sol1,LOW); //ON
       digitalWrite(Sol2,LOW); //ON
-  
+
+      for (int k = 0; k < 5; k++)
+      {
       digitalWrite(pin_cc_1,LOW);
       digitalWrite(pin_cc_2,HIGH);
       // 2
@@ -166,12 +262,28 @@ void loop() {
       digitalWrite(pin_e,HIGH);
       digitalWrite(pin_d,HIGH);
       digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // A
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
     }
     else if (Gear == 3)
     {
       digitalWrite(Sol1,HIGH); //OFF
       digitalWrite(Sol2,LOW); //ON
-  
+
+      for (int k = 0; k < 5; k++)
+      {
       digitalWrite(pin_cc_1,LOW);
       digitalWrite(pin_cc_2,HIGH);
       // 3
@@ -182,12 +294,28 @@ void loop() {
       digitalWrite(pin_e,LOW);
       digitalWrite(pin_d,HIGH);
       digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // A
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
     }
     else if (Gear == 4)
     {
       digitalWrite(Sol1,HIGH); //OFF
       digitalWrite(Sol2,HIGH); //OFF
-  
+
+      for (int k = 0; k < 5; k++)
+      {
       digitalWrite(pin_cc_1,LOW);
       digitalWrite(pin_cc_2,HIGH);
       // 4
@@ -198,15 +326,352 @@ void loop() {
       digitalWrite(pin_e,LOW);
       digitalWrite(pin_d,LOW);
       digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH); //ON
+      digitalWrite(pin_cc_2,LOW); //OFF
+      // A
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
     }
   }
+  // Manual transmission, Manual OFF on TC
+    else if (digitalRead(switch_ON) == HIGH && digitalRead(switch_TC_side1) == LOW && digitalRead(switch_TC_side2) == LOW)
+    {
+    Serial.print("System is ON");
+    
+    DebounceTime = millis();
+    
+    Reading_switch_shift_1 = digitalRead(switch_shift_side1);
+    Reading_switch_shift_2 = digitalRead(switch_shift_side2);
+    
+    if(Reading_switch_shift_1 == HIGH && prevReading_switch_shift_1 != Reading_switch_shift_1 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    {
+      Gear++;
+      prevDebounceTime = DebounceTime;
+    }
+    else if(Reading_switch_shift_2 == HIGH && prevReading_switch_shift_2 != Reading_switch_shift_2 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    {
+      Gear--;
+      prevDebounceTime = DebounceTime;
+    }
   
-  Serial.print("  ");
-  Serial.print(Gear);
-  Serial.print("  ");
-  Serial.print(Reading1);
-  Serial.print("  ");
-  Serial.println(Reading2);
+    if (Gear < 1)
+    {
+      Gear = 1;
+    }
+    else if (Gear > 4)
+    {
+      Gear = 4;
+    }
+  
+    prevReading_switch_shift_1 = Reading_switch_shift_1;
+    prevReading_switch_shift_2 = Reading_switch_shift_2;
+    
+    if (Gear == 1)
+    { 
+      digitalWrite(Sol1,LOW); //ON
+      digitalWrite(Sol2,HIGH); //OFF
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW); //ON
+      digitalWrite(pin_cc_2,HIGH); //OFF
+      // 1
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // U
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
+    }
+    else if (Gear == 2)
+    {
+      digitalWrite(Sol1,LOW); //ON
+      digitalWrite(Sol2,LOW); //ON
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 2
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // U
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
+    }
+    else if (Gear == 3)
+    {
+      digitalWrite(Sol1,HIGH); //OFF
+      digitalWrite(Sol2,LOW); //ON
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 3
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // U
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
+    }
+    else if (Gear == 4)
+    {
+      digitalWrite(Sol1,HIGH); //OFF
+      digitalWrite(Sol2,HIGH); //OFF
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 4
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH); //ON
+      digitalWrite(pin_cc_2,LOW); //OFF
+      // U
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+      }
+    }
+  }
+  // Manual transmission, Manual ON on TC
+    else if (digitalRead(switch_ON) == HIGH && digitalRead(switch_TC_side1) == LOW && digitalRead(switch_TC_side2) == HIGH)
+    {
+    Serial.print("System is ON");
+    
+    DebounceTime = millis();
+    
+    Reading_switch_shift_1 = digitalRead(switch_shift_side1);
+    Reading_switch_shift_2 = digitalRead(switch_shift_side2);
+    
+    if(Reading_switch_shift_1 == HIGH && prevReading_switch_shift_1 != Reading_switch_shift_1 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    {
+      Gear++;
+      prevDebounceTime = DebounceTime;
+    }
+    else if(Reading_switch_shift_2 == HIGH && prevReading_switch_shift_2 != Reading_switch_shift_2 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    {
+      Gear--;
+      prevDebounceTime = DebounceTime;
+    }
+  
+    if (Gear < 1)
+    {
+      Gear = 1;
+    }
+    else if (Gear > 4)
+    {
+      Gear = 4;
+    }
+  
+    prevReading_switch_shift_1 = Reading_switch_shift_1;
+    prevReading_switch_shift_2 = Reading_switch_shift_2;
+    
+    if (Gear == 1)
+    { 
+      digitalWrite(Sol1,LOW); //ON
+      digitalWrite(Sol2,HIGH); //OFF
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW); //ON
+      digitalWrite(pin_cc_2,HIGH); //OFF
+      // 1
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // L
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,LOW);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+      }
+    }
+    else if (Gear == 2)
+    {
+      digitalWrite(Sol1,LOW); //ON
+      digitalWrite(Sol2,LOW); //ON
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 2
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // L
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,LOW);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+      }
+    }
+    else if (Gear == 3)
+    {
+      digitalWrite(Sol1,HIGH); //OFF
+      digitalWrite(Sol2,LOW); //ON
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 3
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH);
+      digitalWrite(pin_cc_2,LOW);
+      // L
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,LOW);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+      }
+    }
+    else if (Gear == 4)
+    {
+      digitalWrite(Sol1,HIGH); //OFF
+      digitalWrite(Sol2,HIGH); //OFF
+
+      for (int k = 0; k < 5; k++)
+      {
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 4
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+      delay(BlinkDelay);
+
+      digitalWrite(pin_cc_1,HIGH); //ON
+      digitalWrite(pin_cc_2,LOW); //OFF
+      // L
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,LOW);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+      delay(BlinkDelay);
+      }
+    }
+  }
+//  Serial.print(" Gear:");
+//  Serial.print(Gear);
+//  Serial.print(" Shift switch1 reading:");
+//  Serial.print(Reading_switch_shift_1);
+//  Serial.print(" Shift switch2 reading:");
+//  Serial.println(Reading_switch_shift_2);
 }
 
 /*

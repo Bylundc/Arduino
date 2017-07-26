@@ -1,0 +1,118 @@
+/*
+  Test of controlling a 7 segment display.
+
+    a
+   ---
+f |   | b
+  | g |
+   ---
+e |   | c
+  |   |
+   ---  * DP
+    d
+*/
+  //pins for the LEDs
+  const int pin_g = 6; 
+  const int pin_f = 5;
+  const int pin_cc_1 = 4;
+  const int pin_a = 3;
+  const int pin_b = 2;
+  const int pin_e = 11; 
+  const int pin_d = 10;
+  const int pin_cc_2 = 9;
+  const int pin_c = 8;
+  const int pin_DP = 7;
+  
+  
+void setup() {
+  pinMode(pin_g,OUTPUT);
+  pinMode(pin_f,OUTPUT);
+  pinMode(pin_cc_1,OUTPUT);
+  pinMode(pin_a,OUTPUT);
+  pinMode(pin_b,OUTPUT);
+  pinMode(pin_e,OUTPUT);
+  pinMode(pin_d,OUTPUT);
+  pinMode(pin_cc_2,OUTPUT);
+  pinMode(pin_c,OUTPUT);
+  pinMode(pin_DP,OUTPUT);
+}
+
+void loop() {
+  digitalWrite(pin_cc_1,HIGH);
+  digitalWrite(pin_cc_2,HIGH);
+}
+
+
+
+
+/*
+  // 1
+  digitalWrite(pin_g,LOW);
+  digitalWrite(pin_f,LOW);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,LOW);
+  digitalWrite(pin_d,LOW);
+  digitalWrite(pin_c,HIGH);
+  digitalWrite(pin_DP,LOW);
+
+  // 2
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,LOW);
+  digitalWrite(pin_a,HIGH);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,LOW);
+  digitalWrite(pin_DP,LOW);
+
+  // 3
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,LOW);
+  digitalWrite(pin_a,HIGH);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,LOW);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,HIGH);
+  digitalWrite(pin_DP,LOW);
+
+  // 4
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,LOW);
+  digitalWrite(pin_d,LOW);
+  digitalWrite(pin_c,HIGH);
+  digitalWrite(pin_DP,LOW);
+
+  // U
+  digitalWrite(pin_g,LOW);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,HIGH);
+  digitalWrite(pin_DP,LOW);
+
+  // L
+  digitalWrite(pin_g,LOW);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,LOW);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,LOW);
+  digitalWrite(pin_DP,LOW);
+  
+  // A
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,HIGH);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,LOW);
+  digitalWrite(pin_c,HIGH);
+  digitalWrite(pin_DP,LOW);
+ */

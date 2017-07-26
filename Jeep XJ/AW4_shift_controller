@@ -1,0 +1,274 @@
+/*
+  This code is an AW4 shift controller for a 1990 Jeep Cherokee XJ
+  Created by: Connor Bylund
+  
+  330 ohm resistors are used on the negative pin of the LEDS
+  10k ohm resistors are used on the negative pin of the switches as a pull up resistor
+  
+  Two 7 segment displays are being used. The left one displays current gear while the right one displays the state of the torque converter.
+  
+  Sol1 ON  Sol2 OFF 1st Gear
+  Sol1 ON  Sol2 ON  2nd Gear
+  Sol1 OFF Sol2 ON  3rd Gear  
+  Sol1 OFF Sol2 OFF 4th Gear
+
+    a
+   ---
+f |   | b
+  | g |
+   ---
+e |   | c
+  |   |
+   ---  * DP
+    d
+  
+*/
+
+// Define which pins the solenoids will use
+const int Sol1 = 14; //A0
+const int Sol2 = 15; //A1
+
+// Define pins for the LEDs
+const int pin_g = 6; 
+const int pin_f = 5;
+const int pin_cc_1 = 4; //Left segment
+const int pin_a = 3;
+const int pin_b = 2;
+const int pin_e = 10; 
+const int pin_d = 9;
+const int pin_cc_2 = 8; //Right segment
+const int pin_c = 7;
+
+// Set up variables for shifting
+const int switch_shift_side1 = 12;
+const int switch_shift_side2 = 13;
+int Reading1;
+int prevReading1;
+int Reading2;
+int prevReading2;
+int Gear = 1;
+
+// Define the ON switch pin
+const int switch_ON = 11;
+
+// Define the TC lockup switch pins
+const int switch_TC_side1 = 16; // AUTO TC Lockup
+const int switch_TC_side2 = 17; // MANUAL TC Lockup
+
+// Set a debounce delay for the switches
+unsigned long DebounceTime;
+unsigned long prevDebounceTime;
+unsigned long DebounceDelay = 300;
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Shift solenoids are OUTPUTs
+  pinMode(Sol1,OUTPUT);
+  pinMode(Sol2,OUTPUT);
+
+  // LEDs are OUTPUTs
+  pinMode(pin_g,OUTPUT);
+  pinMode(pin_f,OUTPUT);
+  pinMode(pin_cc_1,OUTPUT);
+  pinMode(pin_a,OUTPUT);
+  pinMode(pin_b,OUTPUT);
+  pinMode(pin_e,OUTPUT);
+  pinMode(pin_d,OUTPUT);
+  pinMode(pin_cc_2,OUTPUT);
+  pinMode(pin_c,OUTPUT);
+  
+  // Switchs are an input
+  pinMode(switch_shift_side1,INPUT);
+  pinMode(switch_shift_side2,INPUT);
+  pinMode(switch_ON,INPUT);
+}
+
+void loop() {
+  if(digitalRead(switch_ON) == LOW)
+  {    
+    Serial.print("System is OFF");
+    
+    digitalWrite(Sol1,HIGH); //OFF
+    digitalWrite(Sol2,HIGH); //OFF
+
+    digitalWrite(pin_cc_1,LOW); //ON
+    digitalWrite(pin_cc_2,HIGH); //OFF
+    // A
+    digitalWrite(pin_g,HIGH);
+    digitalWrite(pin_f,HIGH);
+    digitalWrite(pin_a,HIGH);
+    digitalWrite(pin_b,HIGH);
+    digitalWrite(pin_e,HIGH);
+    digitalWrite(pin_d,LOW);
+    digitalWrite(pin_c,HIGH);
+  }
+  
+  else{
+    Serial.print("System is ON");
+    
+    DebounceTime = millis();
+    
+    Reading1 = digitalRead(switch_shift_side1);
+    Reading2 = digitalRead(switch_shift_side2);
+    
+    if(Reading1 == HIGH && prevReading1 != Reading1 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    {
+      Gear++;
+      prevDebounceTime = DebounceTime;
+    }
+    else if(Reading2 == HIGH && prevReading2 != Reading2 && ((DebounceTime - prevDebounceTime) > DebounceDelay))
+    {
+      Gear--;
+      prevDebounceTime = DebounceTime;
+    }
+  
+    if (Gear < 1)
+    {
+      Gear = 1;
+    }
+    else if (Gear > 4)
+    {
+      Gear = 4;
+    }
+  
+    prevReading1 = Reading1;
+    prevReading2 = Reading2;
+    
+    if (Gear == 1)
+    { 
+      digitalWrite(Sol1,LOW); //ON
+      digitalWrite(Sol2,HIGH); //OFF
+  
+      digitalWrite(pin_cc_1,LOW); //ON
+      digitalWrite(pin_cc_2,HIGH); //OFF
+      // 1
+      digitalWrite(pin_g,LOW);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+    }
+    else if (Gear == 2)
+    {
+      digitalWrite(Sol1,LOW); //ON
+      digitalWrite(Sol2,LOW); //ON
+  
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 2
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,HIGH);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,LOW);
+    }
+    else if (Gear == 3)
+    {
+      digitalWrite(Sol1,HIGH); //OFF
+      digitalWrite(Sol2,LOW); //ON
+  
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 3
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,LOW);
+      digitalWrite(pin_a,HIGH);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,HIGH);
+      digitalWrite(pin_c,HIGH);
+    }
+    else if (Gear == 4)
+    {
+      digitalWrite(Sol1,HIGH); //OFF
+      digitalWrite(Sol2,HIGH); //OFF
+  
+      digitalWrite(pin_cc_1,LOW);
+      digitalWrite(pin_cc_2,HIGH);
+      // 4
+      digitalWrite(pin_g,HIGH);
+      digitalWrite(pin_f,HIGH);
+      digitalWrite(pin_a,LOW);
+      digitalWrite(pin_b,HIGH);
+      digitalWrite(pin_e,LOW);
+      digitalWrite(pin_d,LOW);
+      digitalWrite(pin_c,HIGH);
+    }
+  }
+  
+  Serial.print("  ");
+  Serial.print(Gear);
+  Serial.print("  ");
+  Serial.print(Reading1);
+  Serial.print("  ");
+  Serial.println(Reading2);
+}
+
+/*
+  // 1
+  digitalWrite(pin_g,LOW);
+  digitalWrite(pin_f,LOW);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,LOW);
+  digitalWrite(pin_d,LOW);
+  digitalWrite(pin_c,HIGH);
+
+  // 2
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,LOW);
+  digitalWrite(pin_a,HIGH);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,LOW);
+
+  // 3
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,LOW);
+  digitalWrite(pin_a,HIGH);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,LOW);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,HIGH);
+  // 4
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,LOW);
+  digitalWrite(pin_d,LOW);
+  digitalWrite(pin_c,HIGH);
+
+  // U
+  digitalWrite(pin_g,LOW);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,HIGH);
+
+  // L
+  digitalWrite(pin_g,LOW);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,LOW);
+  digitalWrite(pin_b,LOW);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,HIGH);
+  digitalWrite(pin_c,LOW);
+
+  // A
+  digitalWrite(pin_g,HIGH);
+  digitalWrite(pin_f,HIGH);
+  digitalWrite(pin_a,HIGH);
+  digitalWrite(pin_b,HIGH);
+  digitalWrite(pin_e,HIGH);
+  digitalWrite(pin_d,LOW);
+  digitalWrite(pin_c,HIGH);
+ */

@@ -59,7 +59,7 @@ const int switch_TC_side2 = 17; // MANUAL TC Lockup
 // Set a debounce delay for the switches
 unsigned long DebounceTime;
 unsigned long prevDebounceTime;
-unsigned long DebounceDelay = 300;
+unsigned long DebounceDelay = 350;
 
 void setup() {
   //Serial.begin(9600);
@@ -95,16 +95,8 @@ void loop() {
     digitalWrite(Sol1,HIGH); //OFF
     digitalWrite(Sol2,HIGH); //OFF
 
-    digitalWrite(pin_cc_1,LOW); //ON
-    digitalWrite(pin_cc_2,LOW); //OFF
-    // A
-    digitalWrite(pin_g,HIGH);
-    digitalWrite(pin_f,HIGH);
-    digitalWrite(pin_a,HIGH);
-    digitalWrite(pin_b,HIGH);
-    digitalWrite(pin_e,HIGH);
-    digitalWrite(pin_d,LOW);
-    digitalWrite(pin_c,HIGH);
+    digitalWrite(pin_cc_1,HIGH); //OFF
+    digitalWrite(pin_cc_2,HIGH); //OFF
   }
   // Auto transmission, Manual OFF on TC
   else if(digitalRead(switch_ON) == LOW && digitalRead(switch_TC_side1) == LOW && digitalRead(switch_TC_side2) == LOW)
@@ -114,21 +106,7 @@ void loop() {
     
     digitalWrite(Sol1,HIGH); //OFF
     digitalWrite(Sol2,HIGH); //OFF
-
-    for (int k = 0; k < 5; k++)
-    {
-    digitalWrite(pin_cc_1,LOW); //ON
-    digitalWrite(pin_cc_2,HIGH); //OFF
-    // A
-    digitalWrite(pin_g,HIGH);
-    digitalWrite(pin_f,HIGH);
-    digitalWrite(pin_a,HIGH);
-    digitalWrite(pin_b,HIGH);
-    digitalWrite(pin_e,HIGH);
-    digitalWrite(pin_d,LOW);
-    digitalWrite(pin_c,HIGH);
-    delay(BlinkDelay);
-    
+  
     digitalWrite(pin_cc_1,HIGH); //OFF
     digitalWrite(pin_cc_2,LOW); //ON
     // U
@@ -139,10 +117,6 @@ void loop() {
     digitalWrite(pin_e,HIGH);
     digitalWrite(pin_d,HIGH);
     digitalWrite(pin_c,HIGH);
-    delay(BlinkDelay);
-
-    k++;
-    }
   }
   // Auto transmission, Manual ON on TC
   else if(digitalRead(switch_ON) == LOW && digitalRead(switch_TC_side1) == LOW && digitalRead(switch_TC_side2) == HIGH)
@@ -152,20 +126,6 @@ void loop() {
     
     digitalWrite(Sol1,HIGH); //OFF
     digitalWrite(Sol2,HIGH); //OFF
-
-    for (int k = 0; k < 5; k++)
-    {
-    digitalWrite(pin_cc_1,LOW); //ON
-    digitalWrite(pin_cc_2,HIGH); //OFF
-    // A
-    digitalWrite(pin_g,HIGH);
-    digitalWrite(pin_f,HIGH);
-    digitalWrite(pin_a,HIGH);
-    digitalWrite(pin_b,HIGH);
-    digitalWrite(pin_e,HIGH);
-    digitalWrite(pin_d,LOW);
-    digitalWrite(pin_c,HIGH);
-    delay(BlinkDelay);
     
     digitalWrite(pin_cc_1,HIGH); //OFF
     digitalWrite(pin_cc_2,LOW); //ON
@@ -177,8 +137,6 @@ void loop() {
     digitalWrite(pin_e,HIGH);
     digitalWrite(pin_d,HIGH);
     digitalWrite(pin_c,LOW);
-    delay(BlinkDelay);
-    }
   }
   // Manual Transmission, Auto TC lockup
   else if (digitalRead(switch_ON) == HIGH && digitalRead(switch_TC_side1) == HIGH && digitalRead(switch_TC_side2) == LOW)
@@ -218,8 +176,6 @@ void loop() {
       digitalWrite(Sol1,LOW); //ON
       digitalWrite(Sol2,HIGH); //OFF
 
-      for (int k = 0; k < 5; k++)
-      {
       digitalWrite(pin_cc_1,LOW); //ON
       digitalWrite(pin_cc_2,HIGH); //OFF
       // 1
@@ -230,28 +186,12 @@ void loop() {
       digitalWrite(pin_e,LOW);
       digitalWrite(pin_d,LOW);
       digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-
-      digitalWrite(pin_cc_1,HIGH);
-      digitalWrite(pin_cc_2,LOW);
-      // A
-      digitalWrite(pin_g,HIGH);
-      digitalWrite(pin_f,HIGH);
-      digitalWrite(pin_a,HIGH);
-      digitalWrite(pin_b,HIGH);
-      digitalWrite(pin_e,HIGH);
-      digitalWrite(pin_d,LOW);
-      digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-      }
     }
     else if (Gear == 2)
     {
       digitalWrite(Sol1,LOW); //ON
       digitalWrite(Sol2,LOW); //ON
 
-      for (int k = 0; k < 5; k++)
-      {
       digitalWrite(pin_cc_1,LOW);
       digitalWrite(pin_cc_2,HIGH);
       // 2
@@ -262,28 +202,12 @@ void loop() {
       digitalWrite(pin_e,HIGH);
       digitalWrite(pin_d,HIGH);
       digitalWrite(pin_c,LOW);
-      delay(BlinkDelay);
-
-      digitalWrite(pin_cc_1,HIGH);
-      digitalWrite(pin_cc_2,LOW);
-      // A
-      digitalWrite(pin_g,HIGH);
-      digitalWrite(pin_f,HIGH);
-      digitalWrite(pin_a,HIGH);
-      digitalWrite(pin_b,HIGH);
-      digitalWrite(pin_e,HIGH);
-      digitalWrite(pin_d,LOW);
-      digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-      }
     }
     else if (Gear == 3)
     {
       digitalWrite(Sol1,HIGH); //OFF
       digitalWrite(Sol2,LOW); //ON
 
-      for (int k = 0; k < 5; k++)
-      {
       digitalWrite(pin_cc_1,LOW);
       digitalWrite(pin_cc_2,HIGH);
       // 3
@@ -294,28 +218,12 @@ void loop() {
       digitalWrite(pin_e,LOW);
       digitalWrite(pin_d,HIGH);
       digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-
-      digitalWrite(pin_cc_1,HIGH);
-      digitalWrite(pin_cc_2,LOW);
-      // A
-      digitalWrite(pin_g,HIGH);
-      digitalWrite(pin_f,HIGH);
-      digitalWrite(pin_a,HIGH);
-      digitalWrite(pin_b,HIGH);
-      digitalWrite(pin_e,HIGH);
-      digitalWrite(pin_d,LOW);
-      digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-      }
     }
     else if (Gear == 4)
     {
       digitalWrite(Sol1,HIGH); //OFF
       digitalWrite(Sol2,HIGH); //OFF
 
-      for (int k = 0; k < 5; k++)
-      {
       digitalWrite(pin_cc_1,LOW);
       digitalWrite(pin_cc_2,HIGH);
       // 4
@@ -326,20 +234,6 @@ void loop() {
       digitalWrite(pin_e,LOW);
       digitalWrite(pin_d,LOW);
       digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-
-      digitalWrite(pin_cc_1,HIGH); //ON
-      digitalWrite(pin_cc_2,LOW); //OFF
-      // A
-      digitalWrite(pin_g,HIGH);
-      digitalWrite(pin_f,HIGH);
-      digitalWrite(pin_a,HIGH);
-      digitalWrite(pin_b,HIGH);
-      digitalWrite(pin_e,HIGH);
-      digitalWrite(pin_d,LOW);
-      digitalWrite(pin_c,HIGH);
-      delay(BlinkDelay);
-      }
     }
   }
   // Manual transmission, Manual OFF on TC
@@ -727,13 +621,4 @@ void loop() {
   digitalWrite(pin_e,HIGH);
   digitalWrite(pin_d,HIGH);
   digitalWrite(pin_c,LOW);
-
-  // A
-  digitalWrite(pin_g,HIGH);
-  digitalWrite(pin_f,HIGH);
-  digitalWrite(pin_a,HIGH);
-  digitalWrite(pin_b,HIGH);
-  digitalWrite(pin_e,HIGH);
-  digitalWrite(pin_d,LOW);
-  digitalWrite(pin_c,HIGH);
  */
